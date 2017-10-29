@@ -1,0 +1,93 @@
+---
+title: "Getting started on Amazon Web Services for `HMMoce` computation"
+author: "Camrin Braun, Benjamin Galuardi, Simon Thorrold"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Using HMMoce}
+  %\VignetteEngine{knitr::rmarkdown}
+  % \VignetteDepends{png, grid}
+  \usepackage[utf8]{inputenc}
+---
+  
+# Summary
+This vignette is intended to ease the learning curve and startup time to running RStudio on an Amazon EC2 instance. Our specific goal is to facilitate plug-and-play functionality for `HMMoce` on RStudio server that allows users to leverage the computing resources of Amazon Web Services (AWS) to perform the large oceanographic data manipulation and computation required for some applications of `HMMoce`. This vignette is a work in progress so please submit any questions, comments, or issues to the `HMMoce` GitHub [site](https://github.com/camrinbraun/HMMoce).
+
+# Getting started
+Navigate to https://aws.amazon.com and follow the prompts to get an account setup.
+
+Once you are all setup, navigate to your dashboard. It should look like this:
+```{r fig.width=8, fig.height=6,echo=FALSE}
+img <- png::readPNG("dashboard.png")
+grid::grid.raster(img)
+```
+
+
+There are now 2 things you need to do before you can get back to working in R: 1) setup a volume and 2) start an EC2 compute instance.
+
+## Setting up a volume
+We will be running a type of compute environment on AWS that can terminate with very little notice (based on fluctuations in the market price for high-performance computing resources). Thus, it is strongly advised that you create a separate volume (think of it like an external hard drive) that you can mount to your compute instance. You can move data back and forth on this volume just like an external hard drive, but it is NOT terminated even if your compute instance is. So lets get this setup first.
+
+From your AWS Dashboard, choose the "Services"" dropdown menu and "EC2". On the left, under "Elastic Block Storage", choose "Volumes" and "Create Volume". The default setup is close to what we want, however you may want to change the size of the volume depending on your needs. 100GB should be enough for most applications. We like to include "Tags" to keep track of which resources belong to which individual, how much different resources cost, etc. Also, the "Availability Zone" is very important so keep track of that as we go forward. You *MUST* ensure that your compute instances are in the same availability zone as your volume!!! It should look something like this:
+```{r fig.width=8, fig.height=6,echo=FALSE}
+img <- png::readPNG("volume.png")
+grid::grid.raster(img)
+```
+
+Once created, the volume will be listed in "Volumes" on the EC2 page and will show "Available" in the "State" column. This means it is ready to be mounted to a compute instance and used.
+
+## Compute instance
+Now you are ready to get a compute instance running. There are many different flavors shown [here](https://aws.amazon.com/ec2/instance-types/), but we like to use the t2.micro instance (which is free!) to get everything up and running. Then we switch to something larger to do the heavy lifting.
+
+On the EC2 page choose "Instances" and "Launch Instance". An Amazon Machine Image is like a snapshot of what you want the compute instance to look like, including the OS, necessary software, etc. We have built one specifically for `HMMoce` based on an RStudio server build by [Louis Aslett](http://www.louisaslett.com/RStudio_AMI/). On the left choose "Community AMIs" and enter xxxx to locate the `HMMoce` AMI. Next choose the instance type (t2.micro will suffice for now) and choose "Configure Instance Details". Under "Subnet", make sure you choose the availability zone to match the volume you created previously. Click "Next" until you get to "Security Group Settings". Feel free to customize other options along the way. You need to allow at least HTTP and SSH access so your settings should look something like this:
+```{r fig.width=8, fig.height=2,echo=FALSE}
+img <- png::readPNG("security.png")
+grid::grid.raster(img)
+```
+
+
+Now you are ready to go. Choose "Review and Launch", then make sure everything looks good and "Launch". You will be asked to create a new key pair (your unique certificate that allows you to access your EC2 instance). Download the key pair you created and save it somewhere secure. I usually keep it on the desktop for easy access from the command line. Once you have finished the key pair steps, choose "Launch".
+
+Now on the EC2 page, you should see your instance initializing and eventually running. To connect via HTTP, simply copy and paste the instance's Public DNS into the address bar on your web browser. The default username and password are both "rstudio". And now you will see RStudio come up in your browser with 2 scripts open: a Welcome.r and and example `HMMoce` script.
+
+## SSH and mount volume
+The easiest way we have found to get up and running with your volume on an EC2 instance is to connect via SSH and do everything via the Linux command line. To connect to your instance via SSH, open Terminal (on Mac) or CygWin (on Windows). Navigate to the folder where your key pair file (.pem) is stored and type:
+```{r fig.width=8, fig.height=2,echo=FALSE}
+img <- png::readPNG("ssh.png")
+grid::grid.raster(img)
+```
+
+The second command indicates the name of my key pair file (cam-aws.pem) and where to connect. Your connection will reflect the public DNS of your EC2 instance and will instead read *ubuntu@ec2-xx-xxx-xx-xxx.us-xxxx-x.compute.amazonaws.com*. 
+
+Once connected, click back to the "Instances" page from the AWS EC2 site, click on your instance and copy the Instance-ID at the bottom. Then navigate to "Volumes" from the EC2 site, click on your volume and in the "Actions" menu choose "Attach Volume". Paste the Instance-ID you just copied into the Instance box and choose "Attach". Now back in the command line type the following:
+```{r fig.width=8, fig.height=1,echo=FALSE}
+img <- png::readPNG("mount.png")
+grid::grid.raster(img)
+```
+
+Replace *my_dir_name* with whatever you want to call the directory where your volume will be mounted. If your volume is not attached at */dev/xvdf*, type *lsblk* and look for the attached volume. Once you have made the directory and mounted the volume there, you should also see it from the RStudio "Files" tab in your browser.
+
+Carefully read through the 2 open R scripts to familiarize yourself with the setup. When you are ready, you can start the example `HMMoce` run script with the included example data. We also recommend the t2.micro instance for reading and formatting your own data and for downloading the necessary environmental data for your own study. When you get to the "Calculate Likelihoods" section of the run script, consider switching to a larger compute instance. This can be done in the same way as described above and change the t2.micro to something larger. This can be done more cheaply using the Spot market. See the Spot request section below for more info.
+
+# Getting your data onto EC2
+The most simple way to get some tag data onto EC2 would be to host it somewhere accessible with `curl` like an FTP site. You can also integrate [Dropbox](http://ged.msu.edu/angus/tutorials-2011/installing-dropbox.html) into an EC2 instance. The best long term solution for us has been to use AWS [S3](http://docs.aws.amazon.com/AmazonS3/latest/dev/Welcome.html). You should spend some time reading about S3 and how it works. To get it up and running on your EC2 instance, navigate to S3 from your AWS dashboard and create a new bucket. In practice, the S3 bucket behaves similarly to a folder on Dropbox. We have already installed the AWS command line tools on the AMI you are running, but you need to configure the setup. Go to your command line and make sure the SSH connection to your EC2 instance is running. To use the command line tools, you first need to configure an IAM user. Follow these [instructions](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html) to get started. Once you have your access keys setup, it is as simple as typing *aws configure* from the command line when connected to your EC2 instance via SSH. Paste your key information into the configure prompts and you are ready to access your S3 buckets. Now follow these [instructions](http://docs.aws.amazon.com/cli/latest/userguide/using-s3-commands.html) to manipulate your data. The *aws s3 cp* command is one of the most useful for moving data. For example, you might type the following in your command line:
+```{r fig.width=8, fig.height=6,echo=FALSE}
+img <- png::readPNG("s3.png")
+grid::grid.raster(img)
+```
+
+You can see the *aws configure* command (I have blacked out my credentials but you would see yours there). This is followed by a command that says we want to copy (*cp*) the "BlueSharks" folder from S3 to the directory where we mounted the volume. The recursive option copies the folder and all of its contents, while the dryrun option means we test the command but do not actually copy anything. This is a great way to move data back and forth from an EC2 instance, a volume attached to an instance, and S3. S3 is also cheaper to store data than a volume so is good for longer-term storage (see AWS Glacier for even longer-term, cheaper storage).
+
+# Spot request computing
+The Spot market essentially allows you to bid on compute resources for a fraction of the price of the normal "on-demand" EC2 resources. In our experience, the savings are typically around 70-80\%. For example, the m4.10xlarge instance with 40CPUs and 160GB of memory is usually around $0.50 per hour. While it seems a little confusing at first, it is well worth the initial effort to learn the Spot market as it pays major dividends when you use the larger compute resources. The major catch is that when you get outbid (which is usually uncommon but can happen), that is, the market price exceeds your bid price (your bid is typically updated by the computer bidding for you), your instance is terminated. The instance is not stopped with all your data intact. It is terminated, deleted. This is why we store all our data and results on a separate volume attached and mounted to an instance. When the instance is terminated in the Spot market, the volume remains intact and you can easily start again where you left off. Of course, you can checkpoint your R code to automatically resume where you left off and even use multiple Spot instances to maintain your computing if one (or more) is terminated. In our experience, we are rarely outbid using the relatively small m class resources in the US West region.
+
+To get started, from the EC2 dashboard choose "Spot Requests" and "Request Spot Instances". Be sure to choose the approporiate AMI. Under "Instance types", you can browse the available types as well as view recent pricing history (remember we are bidding on an ever-fluctuating market of computing). Again, ensure the availability zone matches that of your volume. Accept the other defaults and choose "Next". Follow the prompts on the next page to configure your instance as you see fit (e.g. IAM roles, security group settings, etc.). When you are ready, review and launch. Connecting to and using Spot instances are otherwise identical to the t2.micro and other "on-demand" instances we used before. Remember to attach your volume in the EC2 dashboard. Then use the *mkdir* and *mount* commands from the command line just as before.
+
+# Resources
+There are several great resources online about running R on AWS. Some of the most helpful for us have been:
+* A two-part series by Matt Strimas-Mackey:
+  * http://strimas.com/r/rstudio-cloud-1/
+  * http://strimas.com/r/rstudio-cloud-2/
+* An AWS blog post:
+  * https://aws.amazon.com/blogs/big-data/running-r-on-aws/
+

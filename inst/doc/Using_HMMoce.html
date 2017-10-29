@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Camrin Braun, Benjamin Galuardi, Simon Thorrold" />
+
+<meta name="date" content="2017-10-27" />
+
+<title>A users guide to improved analysis of marine animal movement data using HMMoce</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+
+
+<link href="data:text/css;charset=utf-8,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23header%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%20code%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" rel="stylesheet" type="text/css" />
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">A users guide to improved analysis of marine animal movement data using HMMoce</h1>
+<h4 class="author"><em>Camrin Braun, Benjamin Galuardi, Simon Thorrold</em></h4>
+<h4 class="date"><em>2017-10-27</em></h4>
+
+
+
+<div id="summary" class="section level1">
+<h1>Summary</h1>
+<p>While the number of marine animals being tagged and tracked continues to grow, current satellite tracking techniques largely constrain meaninful inference to largescale movements of surface-dwelling species and are inherently prone to significant error. Hidden Markov models (HMMs) have become increasingly common in the analysis of animal movement data by incorporating underlying behavioral states into movement data. This discretized approach also provides efficient handling of grid-based oceanographic data and likelihood surfaces generated within the package. We present an open-source <code>R</code> package, <code>HMMoce</code>, that uses a state-space HMM approach to improve position estimates derived from electronic tags using three-dimensional oceanographic data. We demonstrate <code>HMMoce</code> with example blue shark (<em>Prionace glauca</em>) data that is included in the package. Our findings illustrate how our software leverages all available tag data, along with oceanographic information, to improve position estimates of tagged marine species. For more details on these methods, including thorough references to the literature <code>HMMoce</code> is based on, please refer to <span class="citation">C. D. Braun, Galuardi, and Thorrold (<a href="#ref-Braun2017">2017</a>)</span>.</p>
+</div>
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>There are many approaches to estimating animal movements from various types of tag data. The paradigm in fish tracking has been to use light levels to estimate position, but many species spend considerable time away from the photic zone. Diving behavior, like a typical diel vertical migration exhibited by deep diving swordfish, can render light geolocation useless. Yet, deep diving provides depth-temperature profile data recorded by the archival tag as it samples throughout a tagged individual’s vertical movements. This sampling provides a unique signature through the oceanographic environment that can be leveraged to help constrain position. When combined with other tag-measured data streams like sea surface temperature (SST), light levels and maximum diving depth, we expect a unique combination of oceanographic characteristics to be diagnostic of an animal’s location. Thus, <code>HMMoce</code> seeks to provide the framework for improving estimates of animal movements based on these oceanographic characteristics and strives to automate much of the data formatting and calculations in a transparent and flexible way.</p>
+</div>
+<div id="getting-prepared" class="section level1">
+<h1>Getting prepared</h1>
+<p>The basic premise for getting yourself ready to implement <code>HMMoce</code> for your data is simple. You need to get deployment information and tag data together, setup some spatial limits and download the gridded environmental data.</p>
+<div id="installation" class="section level3">
+<h3>Installation</h3>
+<p>Get started by installing the latest stable release of <code>HMMoce</code> from CRAN or get the most recent development version from GitHub:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># CRAN download</span>
+<span class="kw">install.packages</span>(<span class="st">'HMMoce'</span>)
+
+<span class="co"># development version is on GitHub</span>
+devtools::<span class="kw">install_git</span>(<span class="st">'https://github.com/camrinbraun/HMMoce'</span>, <span class="dt">depends =</span> T)
+
+<span class="co"># then load the package</span>
+<span class="kw">library</span>(HMMoce)</code></pre></div>
+</div>
+<div id="reading-and-formatting-tag-data" class="section level3">
+<h3>Reading and Formatting Tag Data</h3>
+<p>Once you have the package installed and loaded, its time to get your data loaded and formatted properly. The first thing this requires is to establish a data frame containing start and end dates and locations for your deployment(s). If you plan to run <code>HMMoce</code> for multiple individuals, you probably already have a simple spreadsheet with this metadata so read that in here and format according to the examples, but for now we do it by individual for simplicity.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># PTT or Unique Individual ID</span>
+ptt &lt;-<span class="st"> </span><span class="dv">141259</span>
+
+<span class="co"># TAG/POPUP DATES AND LOCATIONS (dd, mm, YYYY, lat, lon)</span>
+iniloc &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="kw">matrix</span>(<span class="kw">c</span>(<span class="dv">13</span>, <span class="dv">10</span>, <span class="dv">2015</span>, <span class="fl">41.575</span>, -<span class="fl">69.423</span>, 
+                              <span class="dv">24</span>, <span class="dv">2</span>, <span class="dv">2016</span>, <span class="fl">26.6798</span>, -<span class="fl">69.0147</span>), <span class="dt">nrow =</span> <span class="dv">2</span>, <span class="dt">ncol =</span> <span class="dv">5</span>, <span class="dt">byrow =</span> T))
+<span class="kw">colnames</span>(iniloc) =<span class="st"> </span><span class="kw">list</span>(<span class="st">'day'</span>,<span class="st">'month'</span>,<span class="st">'year'</span>,<span class="st">'lat'</span>,<span class="st">'lon'</span>)
+tag &lt;-<span class="st"> </span><span class="kw">as.POSIXct</span>(<span class="kw">paste</span>(iniloc[<span class="dv">1</span>,<span class="dv">1</span>], <span class="st">'/'</span>, iniloc[<span class="dv">1</span>,<span class="dv">2</span>], <span class="st">'/'</span>, iniloc[<span class="dv">1</span>,<span class="dv">3</span>], <span class="dt">sep=</span><span class="st">''</span>), <span class="dt">format =</span> <span class="st">'%d/%m/%Y'</span>)
+pop &lt;-<span class="st"> </span><span class="kw">as.POSIXct</span>(<span class="kw">paste</span>(iniloc[<span class="dv">2</span>,<span class="dv">1</span>], <span class="st">'/'</span>, iniloc[<span class="dv">2</span>,<span class="dv">2</span>], <span class="st">'/'</span>, iniloc[<span class="dv">2</span>,<span class="dv">3</span>], <span class="dt">sep=</span><span class="st">''</span>), <span class="dt">format =</span> <span class="st">'%d/%m/%Y'</span>)
+
+<span class="co"># VECTOR OF DATES FROM DATA. THIS WILL BE THE TIME STEPS, T, IN THE LIKELIHOODS</span>
+dateVec &lt;-<span class="st"> </span><span class="kw">as.Date</span>(<span class="kw">seq</span>(tag, pop, <span class="dt">by =</span> <span class="st">'day'</span>)) </code></pre></div>
+<p>Next up is reading in the tag data. <code>HMMoce</code> includes a read function (<code>read.wc</code>) that reads and formats Wildlife Computers tag data automatically, and we plan to add functionality for other manufacturers based on user input. For now, we assume the tag data source .csv files (e.g. “141259-PDTs.csv”) have been downloaded from the Wildlife Computers data portal for standardization. For more on the portal visit <a href="http://wildlifecomputers.com/">Wildlife Computers</a>. Set the directory where your data lives and load the necessary files. Here we choose to load all the available data for this tag to demonstrate how all the different types are leveraged later on.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#------------</span>
+<span class="co"># LOAD THE TAG DATA</span>
+<span class="co">#------------</span>
+<span class="co"># setwd()</span>
+
+<span class="co"># SET INITIAL LOCATIONS (TAG AND POP-UP)</span>
+iniloc &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="kw">matrix</span>(<span class="kw">c</span>(<span class="dv">13</span>, <span class="dv">10</span>, <span class="dv">2015</span>, <span class="fl">41.3</span>, -<span class="fl">69.27</span>, 
+                              <span class="dv">10</span>, <span class="dv">4</span>, <span class="dv">2016</span>, <span class="fl">40.251</span>, -<span class="fl">36.061</span>), <span class="dt">nrow =</span> <span class="dv">2</span>, <span class="dt">ncol =</span> <span class="dv">5</span>, <span class="dt">byrow =</span> T))
+<span class="kw">names</span>(iniloc) &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="st">'day'</span>,<span class="st">'month'</span>,<span class="st">'year'</span>,<span class="st">'lat'</span>,<span class="st">'lon'</span>)
+tag &lt;-<span class="st"> </span><span class="kw">as.POSIXct</span>(<span class="kw">paste</span>(iniloc[<span class="dv">1</span>,<span class="dv">1</span>], <span class="st">'/'</span>, iniloc[<span class="dv">1</span>,<span class="dv">2</span>], <span class="st">'/'</span>, iniloc[<span class="dv">1</span>,<span class="dv">3</span>], <span class="dt">sep=</span><span class="st">''</span>), <span class="dt">format =</span> <span class="st">'%d/%m/%Y'</span>, <span class="dt">tz=</span><span class="st">'UTC'</span>)
+pop &lt;-<span class="st"> </span><span class="kw">as.POSIXct</span>(<span class="kw">paste</span>(iniloc[<span class="dv">2</span>,<span class="dv">1</span>], <span class="st">'/'</span>, iniloc[<span class="dv">2</span>,<span class="dv">2</span>], <span class="st">'/'</span>, iniloc[<span class="dv">2</span>,<span class="dv">3</span>], <span class="dt">sep=</span><span class="st">''</span>), <span class="dt">format =</span> <span class="st">'%d/%m/%Y'</span>, <span class="dt">tz=</span><span class="st">'UTC'</span>)
+
+<span class="co"># VECTOR OF DATES FROM DATA. THIS WILL BE THE TIME STEPS, T, IN THE LIKELIHOODS</span>
+dateVec &lt;-<span class="st"> </span><span class="kw">as.Date</span>(<span class="kw">seq</span>(tag, pop, <span class="dt">by =</span> <span class="st">'day'</span>)) 
+
+<span class="co"># READ IN DATA AS OUTPUT FROM WC PORTAL</span>
+<span class="co"># SST DATA</span>
+sstFile &lt;-<span class="st"> </span><span class="kw">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;141259-SST.csv&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;HMMoce&quot;</span>)
+tag.sst &lt;-<span class="st"> </span><span class="kw">read.wc</span>(ptt, sstFile, <span class="dt">type =</span> <span class="st">'sst'</span>, <span class="dt">tag=</span>tag, <span class="dt">pop=</span>pop, <span class="dt">verbose=</span>T) 
+sst.udates &lt;-<span class="st"> </span>tag.sst$udates; tag.sst &lt;-<span class="st"> </span>tag.sst$data
+
+<span class="co"># DEPTH-TEMPERATURE PROFILE DATA</span>
+pdtFile &lt;-<span class="st"> </span><span class="kw">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;141259-PDTs.csv&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;HMMoce&quot;</span>)
+pdt &lt;-<span class="st"> </span><span class="kw">read.wc</span>(ptt, pdtFile, <span class="dt">type =</span> <span class="st">'pdt'</span>, <span class="dt">tag=</span>tag, <span class="dt">pop=</span>pop, <span class="dt">verbose=</span>T) 
+pdt.udates &lt;-<span class="st"> </span>pdt$udates; pdt &lt;-<span class="st"> </span>pdt$data
+
+<span class="co"># RAW LIGHT DATA</span>
+<span class="co">#lightFile &lt;- system.file(&quot;extdata&quot;, &quot;141259-LightLoc.csv&quot;, package = &quot;HMMoce&quot;)</span>
+<span class="co">#light &lt;- read.wc(ptt, lightFile, type = 'light', tag=tag, pop=pop); </span>
+<span class="co">#light.udates &lt;- light$udates; light &lt;- light$data</span>
+
+<span class="co"># LIGHT BASED POSITIONS FROM GPE2 (INSTEAD OF RAW LIGHTLOCS FROM PREVIOUS)</span>
+locsFile &lt;-<span class="st"> </span><span class="kw">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;141259-Locations-GPE2.csv&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;HMMoce&quot;</span>)
+locs &lt;-<span class="st"> </span><span class="kw">read.table</span>(locsFile, <span class="dt">sep =</span> <span class="st">','</span>, <span class="dt">header =</span> T, <span class="dt">blank.lines.skip =</span> F)
+locDates &lt;-<span class="st"> </span><span class="kw">as.Date</span>(<span class="kw">as.POSIXct</span>(locs$Date, <span class="dt">format=</span><span class="kw">findDateFormat</span>(locs$Date)))</code></pre></div>
+<p>The <code>read.wc</code> function reads the type of data requested and automatically formats it for use in the likelihood calculations. See <code>?read.wc</code> for more information and a list of available data input types.</p>
+</div>
+<div id="setting-spatial-bounds" class="section level3">
+<h3>Setting spatial bounds</h3>
+<p>The next preparation step involves setting spatial boundaries to work within. This can either be set manually (as a list) or by passing a -Locations.csv file to <code>setup.locs.grid</code>. This step is critical in the model setup because it <em>must</em> incorporate the complete geographic limits of your animal(s) movements! If it doesn’t, the movement likelihoods will likely run into the edges of your spatial limits (specified here), and you will have to start over. Thus, this step is typically accomplished best by a combination of expert opinion (thats you!) and by looking at the spatial bounds of tagging and pop-up locations and longitude estimates from GPE2. If you aren’t using GPE2, do some preliminary plotting of tag data like SST to try to constrain where you think the animal went. There’s no harm in having to come back to this when your model runs into the boundaries except that you’ll have to download all the environmental data again which, you will soon find out, takes time. The trade-off here is that larger model boundaries yield larger grids which means longer computation time. Finally, be smart about setting spatial limits when you plan to use <code>HMMoce</code> for a group of tag datasets. Find the largest common grid and use that for all analyses. That means you only have to download the oceanographic data once!</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># SET SPATIAL LIMITS, IF DESIRED, OR PASS GPE FILE</span>
+<span class="co"># these are the lat/lon bounds of your study area (e.g. where you think the animal went)</span>
+sp.lim &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="dt">lonmin =</span> -<span class="dv">82</span>, <span class="dt">lonmax =</span> -<span class="dv">25</span>, <span class="dt">latmin =</span> <span class="dv">15</span>, <span class="dt">latmax =</span> <span class="dv">50</span>)
+
+if (<span class="kw">exists</span>(<span class="st">'sp.lim'</span>)){
+  locs.grid &lt;-<span class="st"> </span><span class="kw">setup.locs.grid</span>(sp.lim)
+} else{
+  locs.grid &lt;-<span class="st"> </span><span class="kw">setup.locs.grid</span>(gpe2)
+  sp.lim &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="dt">lonmin =</span> <span class="kw">min</span>(locs.grid$lon[<span class="dv">1</span>,]), <span class="dt">lonmax =</span> <span class="kw">max</span>(locs.grid$lon[<span class="dv">1</span>,]),
+                 <span class="dt">latmin =</span> <span class="kw">min</span>(locs.grid$lat[,<span class="dv">1</span>]), <span class="dt">latmax =</span> <span class="kw">max</span>(locs.grid$lat[,<span class="dv">1</span>]))
+}</code></pre></div>
+</div>
+<div id="getting-environmental-data" class="section level3">
+<h3>Getting environmental data</h3>
+<p>With our spatial limits set and our initial tag data read in, we need to have the environmental data to compare our tag measurements to. To do this, <code>HMMoce</code> has a <code>get.env</code> function for which you specify your dates of interest, spatial limits, and type of data you need. The <code>get.env</code> function then downloads the requested data. The SST default data is the Optimally Interpolated (OI) 1/4<span class="math inline">\(^\circ\)</span> <a href="https://www.ncdc.noaa.gov/oisst">product</a> and includes an option to use <a href="https://www.ghrsst.org/">GHRSST</a> data, but additional datasets can easily be added based on user input. Depth-temperature profiles are compared to <a href="http://hycom.org/dataserver/glb-analysis">HYCOM</a> predictions from the 1/12<span class="math inline">\(^\circ\)</span> global analysis or the <a href="https://www.nodc.noaa.gov/OC5/woa13/">WOA</a> climatology. The WOA data used here is from the link above but is hosted in a more accessible form for our purposes on Dropbox. See <code>get.env(type = 'woa')</code> for more info. Bathymetry data comes from the Scripps <a href="http://topex.ucsd.edu/WWW_html/srtm30_plus.html">SRTM30</a> product. The HYCOM and GHRSST datasets for the duration of a tag deployment can be large so be patient. If you plan to analyze multiple tag datasets over a similar time period and spatial domain, consider that before downloading the environmental datasets to save yourself from having to change spatial/temporal bounds later and download everything again! For a group of tags, combine the unique dates of SST measurements across all tags and find a common spatial grid before downloading the SST data. The last thing you should do is download new oceanographic data for each tagged individual if there’s spatial and temporal overlap!</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#------------</span>
+<span class="co"># GET ENVIRONMENTAL DATA</span>
+<span class="co">#------------ </span>
+
+<span class="co"># DOWNLOAD SST DATA</span>
+sst.dir &lt;-<span class="st"> </span><span class="kw">paste</span>(<span class="kw">tempdir</span>(), <span class="st">'/sst/'</span>, <span class="dt">sep=</span><span class="st">''</span>)
+<span class="kw">dir.create</span>(sst.dir, <span class="dt">recursive =</span> <span class="ot">TRUE</span>)
+<span class="kw">get.env</span>(sst.udates, <span class="dt">filename=</span><span class="st">'oisst'</span>, <span class="dt">type =</span> <span class="st">'sst'</span>, <span class="dt">sst.type=</span><span class="st">'oi'</span>, <span class="dt">spatLim =</span> sp.lim, <span class="dt">save.dir =</span> sst.dir)
+
+<span class="co"># YOU NEED SOME REPRESENTATION OF ENVIRONMENTAL DEPTH-TEMPERATURE</span>
+<span class="co"># HYCOM DATA</span>
+hycom.dir &lt;-<span class="st"> </span><span class="kw">paste</span>(<span class="kw">tempdir</span>(), <span class="st">'/hycom/'</span>, <span class="dt">sep=</span><span class="st">''</span>)
+<span class="kw">dir.create</span>(hycom.dir, <span class="dt">recursive =</span> <span class="ot">TRUE</span>)
+<span class="kw">get.env</span>(pdt.udates, <span class="dt">filename=</span><span class="st">'hycom'</span>, <span class="dt">type =</span> <span class="st">'hycom'</span>, <span class="dt">spatLim =</span> sp.lim, <span class="dt">save.dir =</span> hycom.dir)
+
+<span class="co"># OR WORLD OCEAN ATLAS DATA</span>
+<span class="co">#woa.dir &lt;- paste(tempdir(), '/woa/', sep='')</span>
+<span class="co">#dir.create(woa.dir, recursive = TRUE)</span>
+<span class="co">#get.env(type = 'woa', resol = 'quarter', save.dir = woa.dir)</span>
+<span class="co"># THEN LOAD AND CHECK THE DOWNLOADED RDA FILE FOR WOA</span>
+<span class="co">#load(paste(woa.dir,'woa.quarter.rda',sep=''))</span>
+<span class="co">#str(woa.quarter)</span>
+<span class="co">#List of 4</span>
+<span class="co">#$ watertemp: num [1:44, 1:46, 1:57, 1:12] 26.5 26.5 26.4 26.3 26.2 ...</span>
+<span class="co">#$ lon      : num [1:44(1d)] -95.5 -94.5 -93.5 -92.5 -91.5 -90.5 -89.5 -88.5 -87.5 -86.5 ...</span>
+<span class="co">#$ lat      : num [1:46(1d)] 9.5 10.5 11.5 12.5 13.5 14.5 15.5 16.5 17.5 18.5 ...</span>
+<span class="co">#$ depth    : num [1:57(1d)] 0 5 10 15 20 25 30 35 40 45 ...</span>
+
+<span class="co"># BATHYMETRY</span>
+bathy.dir &lt;-<span class="st"> </span><span class="kw">paste</span>(<span class="kw">tempdir</span>(), <span class="st">'/bathy/'</span>, <span class="dt">sep=</span><span class="st">''</span>)
+<span class="kw">dir.create</span>(bathy.dir, <span class="dt">recursive =</span> <span class="ot">TRUE</span>)
+bathy &lt;-<span class="st"> </span><span class="kw">get.bath.data</span>(sp.lim$lonmin, sp.lim$lonmax, sp.lim$latmin, sp.lim$latmax, <span class="dt">folder =</span> bathy.dir)
+<span class="co">#library(raster); plot(bathy)</span>
+<span class="co"># OR READ IT FROM NETCDF</span>
+<span class="co">#bathy.nc &lt;- RNetCDF::open.nc(paste(bathy.dir, 'bathy.nc', sep=''))</span></code></pre></div>
+</div>
+</div>
+<div id="the-observation-model" class="section level1">
+<h1>The observation model</h1>
+<p>Once the environmental data is downloaded to its respective directory, you’re ready for likelihood calculations. There are 3 main data streams currently collected by archival tags on marine animals: light, SST, depth-temperature profiles. Each of these data streams contains information about the location of the animal in the global ocean; thus, each can be leveraged to inform our estimation of animal movements. Light levels and SST are the current paradigm for fish tracking and are the most straightforward to use for positioning. The depth-temperature profiles are more complex but provide rich information about oceanographic characteristics animals experience as they move. Each data type has its own likelihood function(s) that does the grunt work for you.</p>
+<div id="light-likelihood" class="section level3">
+<h3>Light likelihood</h3>
+<p>In <code>HMMoce</code>, there are currently two methods for light-based likelihood calculations. The simplest is using tag-based light levels to estimate sunrise and sunset times and thus position. This approach is performed by <code>calc.srss</code> but is an overly simplistic treatment of this data so we often 1) throw out latitude estimates and only keep longitude and 2) get a lot of bad location information, particularly from species that don’t frequent the photic zone. For example, a surface-oriented species that dives below the photic zone 30 minutes before sunset would generate an artificial sunset time 30 minutes early, causing ~8° longitudinal difference in position estimate! A somewhat improved approach is to use the more complex light-based geolocation algorithm previously employed by the tag manufacturer, Wildlife Computers, called GPE2. This uses a threshold approach developed by <span class="citation">Hill and Braun (<a href="#ref-Hill2001">2001</a>)</span> which results in 1) less spurious position estimates and 2) user-controlled vetting process of estimates via a GUI. This functionality requires that the user process their light data using the GPE2 environment which is no longer supported by the manufacturer but is still available <a href="http://wildlifecomputers.com/support/downloads/">here</a>. GPE2 output data is used in <code>HMMoce</code> with <code>calc.gpe2</code>. In either case, the resulting <code>L.light</code> raster contains daily (when available) likelihood surfaces representing the likelihood of an animal’s location based on light data.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># LIGHT-BASED LIKELIHOODS</span>
+<span class="co"># RAW LIGHT LEVELS</span>
+<span class="co">#L.1 &lt;- calc.srss(light, locs.grid = locs.grid, dateVec = dateVec, res=0.25) # if trying to use raw light levels, not currently recommended (v0.2)</span>
+
+<span class="co"># GPE2 METHOD</span>
+L<span class="fl">.1</span> &lt;-<span class="st"> </span><span class="kw">calc.gpe2</span>(locs, locDates, <span class="dt">locs.grid =</span> locs.grid, <span class="dt">dateVec =</span> dateVec, <span class="dt">errEll =</span> <span class="ot">FALSE</span>, <span class="dt">gpeOnly =</span> <span class="ot">TRUE</span>)</code></pre></div>
+</div>
+<div id="sea-surface-temperature-likelihood" class="section level3">
+<h3>Sea surface temperature likelihood</h3>
+<p>For the SST likelihood approach in <code>HMMoce</code>, tag-based SST data is represented as a daily range in SST <span class="math inline">\(\pm\)</span> error (currently defaults to 1%) and compare that SST envelope to a remotely-sensed SST product. We currently use the <a href="https://www.ncdc.noaa.gov/oisst">Optimum Interpolation</a> product due to its comprehensive coverage and 1/4<span class="math inline">\(^\circ\)</span> resolution; however, any SST product could be used here with only minor changes to the download function, <code>get.env</code>. <a href="https://www.ghrsst.org/">GHRSST</a> was recently added based on the need for higher resolution (0.01°) from some users but is currently automatically downsampled to 0.1° to ease computation requirements. In addition, parallel computing was recently added to leverage core availability when running <code>HMMoce</code> on powerful servers or cloud solutions. The output from <code>calc.sst</code> (or the parallelized version <code>calc.sst.par</code>) is a raster of daily likelihood surfaces for the animal’s movements based on SST measurements. For complete details on this calculation, including the density function and integration equation, see the supplemental methods in <span class="citation">C. D. Braun, Galuardi, and Thorrold (<a href="#ref-Braun2017">2017</a>)</span>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># GENERATE DAILY SST LIKELIHOODS</span>
+L<span class="fl">.2</span> &lt;-<span class="st"> </span><span class="kw">calc.sst.par</span>(tag.sst, <span class="dt">filename=</span><span class="st">'oisst'</span>, <span class="dt">sst.dir =</span> sst.dir, <span class="dt">dateVec =</span> dateVec, <span class="dt">sens.err =</span> <span class="dv">1</span>)
+<span class="co"># calc.sst() is non-parallel version of the same thing</span></code></pre></div>
+</div>
+<div id="depth-temperature-profile-likelihood" class="section level3">
+<h3>Depth-temperature profile likelihood</h3>
+<p>The depth-temperature profile (PDT) data from the tag is the main contribution of <code>HMMoce</code> to the marine animal tracking community. This functionality allows users to use depth-temperature profiles measured by tagged animals to improve position estimates, which is particularly useful for study species that rarely visit the photic zone during the day (e.g. swordfish, <span class="citation">Neilson et al. (<a href="#ref-Neilson2009">2009</a>)</span>) or spend considerable periods of time in the mesopelagic (e.g. basking sharks, <span class="citation">Skomal et al. (<a href="#ref-Skomal2009">2009</a>)</span>). In <code>HMMoce</code>, there are currently two approaches to using the PDT data for geolocation. The first follows <span class="citation">Luo et al. (<a href="#ref-Luo2015">2015</a>)</span> by integrating profile data to calculate Ocean Heat Content (OHC). We integrate tag-based PDT data from a certain isotherm to the surface to calculate the “heat content” of that layer measured by the tagged animal. Similarly, we perform the same integration on the model ocean as represented in the HYbrid Coordinate Ocean Model (<a href="http://hycom.org/">HYCOM</a>) and compare the two integrated metrics to generate a likelihood surface representing the animal’s estimated daily position. The second approach is to use the profile in 3D space and compare it to oceanography at measured depth levels. This uses the same tag-based PDT data (not integrated) and compares it to modeled HYCOM data or climatological mean data contained in the World Ocean Atlas (<a href="https://www.nodc.noaa.gov/OC5/woa13/">WOA</a>). In either case, we use a linear regression to predict the tag-based temperature at the standard depth levels measured in the oceanographic datasets. Then a likelihood is calculated in the same fashion by comparing temperature from the tag to ocean temperature at each depth level and resulting likelihood layers are multiplied across depth levels to result in a single daily likelihood layer based on the tagged animal’s dive data (<code>L.prof</code>). Parallelized calculation functions are available for all three depth-temperature based likelihood functions (<code>calc.ohc.par</code>, <code>calc.woa.par</code>, <code>calc.hycom.par</code>). For complete details on the various depth-temperature profile methods available in <code>HMMoce</code>, please refer to <span class="citation">C. D. Braun, Galuardi, and Thorrold (<a href="#ref-Braun2017">2017</a>)</span>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># GENERATE DAILY OHC LIKELIHOODS</span>
+L<span class="fl">.3</span> &lt;-<span class="st"> </span><span class="kw">calc.ohc.par</span>(pdt, <span class="dt">filename=</span><span class="st">'hycom'</span>, <span class="dt">ohc.dir =</span> hycom.dir, <span class="dt">dateVec =</span> dateVec, <span class="dt">isotherm =</span> <span class="st">''</span>, <span class="dt">use.se =</span> F)
+
+<span class="co"># LIKELIHOODS BASED ON WOA PROFILES (IN SITU CLIMATOLOGICAL MEAN)</span>
+L<span class="fl">.4</span> &lt;-<span class="st"> </span><span class="kw">calc.woa.par</span>(pdt, <span class="dt">ptt=</span>ptt, <span class="dt">woa.data =</span> woa.quarter, <span class="dt">sp.lim=</span>sp.lim, <span class="dt">focalDim =</span> <span class="dv">9</span>, <span class="dt">dateVec =</span> dateVec, <span class="dt">use.se =</span> T)
+
+<span class="co"># AND HYCOM PROFILES (MODEL OCEAN)</span>
+L<span class="fl">.5</span> &lt;-<span class="st"> </span><span class="kw">calc.hycom.par</span>(pdt, <span class="dt">filename=</span><span class="st">'hycom'</span>, hycom.dir, <span class="dt">focalDim =</span> <span class="dv">9</span>, <span class="dt">dateVec =</span> dateVec, <span class="dt">use.se =</span> T)</code></pre></div>
+</div>
+<div id="resampling-and-combining-likelihoods" class="section level3">
+<h3>Resampling and combining likelihoods</h3>
+<p>After the desired likelihood calculations are complete, the likelihood rasters are resampled to ensure comparable extent and resolution among layers using <code>resample.grid</code>. This function also returns a variable called <code>L.mle</code> which is a more coarse (lower resolution) representation of the overall likelihoods to speed up parameter estimation in the next step. After resampling, we use <code>make.L</code> to combine the different likelihoods and construct a single, overall likelihood. Known locations can also be incorporated here if there are any sightings, acoustic data or other sources of additional position information for this individual. The resulting <code>L</code> array from <code>make.L</code> is carried forward into the convolution of our observations with theoretical animal movements in the next steps.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#----------------------------------------------------------------------------------#</span>
+<span class="co"># LIST AND RESAMPLE</span>
+<span class="co">#----------------------------------------------------------------------------------#</span>
+
+<span class="co"># create a list of the likelihood rasters just created</span>
+L.rasters &lt;-<span class="st"> </span><span class="kw">mget</span>(<span class="kw">ls</span>(<span class="dt">pattern =</span> <span class="st">'L</span><span class="ch">\\</span><span class="st">.'</span>)) <span class="co"># use with caution as all workspace items containing 'L.' will be listed. We only want the likelihood outputs calculated above</span>
+
+<span class="co"># resample them all to match the most coarse layer (typically light at 1/4 deg)</span>
+<span class="co"># this can be changed to use whatever resolution you choose</span>
+resamp.idx &lt;-<span class="st"> </span><span class="kw">which.max</span>(<span class="kw">lapply</span>(L.rasters, <span class="dt">FUN=</span>function(x) raster::<span class="kw">res</span>(x)[<span class="dv">1</span>]))
+L.res &lt;-<span class="st"> </span><span class="kw">resample.grid</span>(L.rasters, L.rasters[[resamp.idx]])
+  
+<span class="co"># Figure out appropriate L combinations</span>
+<span class="co"># use this if you have a vector (likVec) indicating which likelihoods you are calculating</span>
+<span class="co"># for example, likVec &lt;- c(1,2,5) for light, sst, and hycom likelihoods</span>
+if (<span class="kw">length</span>(likVec) &gt;<span class="st"> </span><span class="dv">2</span>){
+  L.idx &lt;-<span class="st"> </span><span class="kw">c</span>(utils::<span class="kw">combn</span>(likVec, <span class="dv">2</span>, <span class="dt">simplify=</span>F), utils::<span class="kw">combn</span>(likVec, <span class="dv">3</span>, <span class="dt">simplify=</span>F))
+} else{
+  L.idx &lt;-<span class="st"> </span>utils::<span class="kw">combn</span>(likVec, <span class="dv">2</span>, <span class="dt">simplify=</span>F)
+}
+
+<span class="co"># which of L.idx combinations do you want to run?</span>
+run.idx &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">4</span>)
+
+<span class="co"># vector of appropriate bounding in filter. see ?hmm.filter for more info</span>
+bndVec &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="ot">NA</span>, <span class="dv">5</span>, <span class="dv">10</span>)
+
+<span class="co"># vector of appropriate migr kernel speed. see ?makePar for more info.</span>
+parVec &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">4</span>)
+
+<span class="co">#----------------------------------------------------------------------------------#</span>
+<span class="co"># COMBINE LIKELIHOODS</span>
+<span class="co">#----------------------------------------------------------------------------------#</span>
+L &lt;-<span class="st"> </span><span class="kw">make.L</span>(<span class="dt">L1 =</span> L.res[[<span class="dv">1</span>]][L.idx[[tt]]],
+            <span class="dt">L.mle.res =</span> L.res$L.mle.res, <span class="dt">dateVec =</span> dateVec,
+            <span class="dt">locs.grid =</span> locs.grid, <span class="dt">iniloc =</span> iniloc, <span class="dt">bathy =</span> bathy, <span class="dt">pdt =</span> pdt)
+      
+L.mle &lt;-<span class="st"> </span>L$L.mle
+L &lt;-<span class="st"> </span>L$L
+g &lt;-<span class="st"> </span>L.res$g
+g.mle &lt;-<span class="st"> </span>L.res$g.mle
+lon &lt;-<span class="st"> </span>g$lon[<span class="dv">1</span>,]
+lat &lt;-<span class="st"> </span>g$lat[,<span class="dv">1</span>]</code></pre></div>
+</div>
+</div>
+<div id="theoretical-movements-and-convolution" class="section level1">
+<h1>Theoretical movements and convolution</h1>
+<div id="parameter-estimation" class="section level3">
+<h3>Parameter estimation</h3>
+<p>Now that the observation data has been used to generate daily likelihoods, we need a way to represent the most likely way the animal moved through likelihood space. To do this, we generate a theoretical movement model assuming diffusive (Brownian) motion. That is, the animal is represented virtually as a particle that is allowed to diffuse (no advection) based on diffusion characteristics of 2 different behavior states, for example, migratory and resident behaviors. Each behavior state is represented by different diffusion metrics which we expect a migratory animal to diffuse much more widely than a resident animal. Currently, diffusion speeds are fixed based on expert knowledge of the tagged animal. Migratory speed is required and is set using <code>migr.spd</code> in <code>makePar</code>. The accompanying <code>resid.frac</code> argument determines the percentage of the migratory speed the user wants to set the resident speed at. If not set, it defaults to 10%.</p>
+<p>The other parameters governing the theoretical movements is the probability of switching between the two behavior states. This is represented as a 2x2 matrix where [1,1] indicated the probability of an animal staying in state1 given it is currently in state 1 and [1,2] is the probability of the animal moving to state 2 given it is in state 1. The same is true (in reverse order) for the second row. These parameters are calculated using an Expectation-Maximization algorithm similar to <span class="citation">Woillez et al. (<a href="#ref-Woillez2016">2016</a>)</span>. In <code>HMMoce</code>, this is done for you in the <code>expmax</code> function and is best performed on the more coarse outputs from <code>make.L</code> (<code>g.mle</code> and <code>L.mle</code>). The coarse grids tend to provide estimates that are similar to those calculated from the finer grids in much less time or can be used to make better guesses (<code>p.guess</code>) for a second run on the full-resolution grid. The parameter estimation works best in 2 steps: 1) make a guess (or use the default) and iterate on a coarse grid until convergence is reached; 2) store coarse grid switch estimates and switch to full-resolution grid. Run <code>makePar</code> again without estimating switch probabilities (<code>calcP=FALSE</code>) to get movement kernels based on the finer grid.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># GET SWITCH PROB BASED ON COARSE GRID (MUCH FASTER)</span>
+par0 &lt;-<span class="st"> </span><span class="kw">makePar</span>(<span class="dt">migr.spd=</span>i, <span class="dt">grid=</span>g.mle, <span class="dt">L.arr=</span>L.mle, <span class="dt">p.guess=</span><span class="kw">c</span>(.<span class="dv">9</span>,.<span class="dv">9</span>), <span class="dt">calcP=</span>T)
+P.final &lt;-<span class="st"> </span>par0$P.final
+              
+<span class="co"># GET MOVEMENT KERNELS FROM FULL-RES GRID, IGNORE SWITCH PROB</span>
+par0 &lt;-<span class="st"> </span><span class="kw">makePar</span>(<span class="dt">migr.spd=</span>i, <span class="dt">grid=</span>g, <span class="dt">L.arr=</span>L, <span class="dt">p.guess=</span><span class="kw">c</span>(.<span class="dv">9</span>,.<span class="dv">9</span>), <span class="dt">calcP=</span>F)
+K1 &lt;-<span class="st"> </span>par0$K1; K2 &lt;-<span class="st"> </span>par0$K2</code></pre></div>
+</div>
+<div id="convolution-and-the-hmm" class="section level3">
+<h3>Convolution and the HMM</h3>
+<p>Once all the parameters are in order, the theoretical movement model and the observations are convolved in a HMM filter that provides the probability distribution of the states (location and behavior) forward in time conditional on data. These state estimates are calculated successively by alternating between so-called time and data updates of the current state. Following filtering, the recursions of the HMM smoothing step work backwards in time using the filtered state estimates and all available data to determine the smoothed state estimates. The smoothed state estimates are more accurate and generally appear ‘smoother’ than the filtering estimates because they exploit the full data set. The probability distribution of all states at specific times are the state estimates returned from the HMM smoothing algorithm. For more information on the HMM, see <span class="citation">M. W. Pedersen et al. (<a href="#ref-Pedersen2008">2008</a>)</span>, <span class="citation">M. Pedersen et al. (<a href="#ref-Pedersen2011">2011</a>)</span> and the supplemental materials for <span class="citation">C. D. Braun, Galuardi, and Thorrold (<a href="#ref-Braun2017">2017</a>)</span>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># RUN THE FILTER STEP</span>
+if(!<span class="kw">is.na</span>(bnd)){
+  f &lt;-<span class="st"> </span><span class="kw">hmm.filter</span>(g, L, K1, K2, <span class="dt">maskL=</span>T, P.final, <span class="dt">minBounds =</span> bnd)
+  maskL.logical &lt;-<span class="st"> </span><span class="ot">TRUE</span>
+} else{
+  f &lt;-<span class="st"> </span><span class="kw">hmm.filter</span>(g, L, K1, K2, P.final, <span class="dt">maskL=</span>F)
+  maskL.logical &lt;-<span class="st"> </span><span class="ot">FALSE</span>
+  }
+nllf &lt;-<span class="st"> </span>-<span class="kw">sum</span>(<span class="kw">log</span>(f$psi[f$psi&gt;<span class="dv">0</span>])) <span class="co"># negative log-likelihood</span>
+      
+<span class="co"># RUN THE SMOOTHING STEP</span>
+s &lt;-<span class="st"> </span><span class="kw">hmm.smoother</span>(f, K1, K2, L, P.final)</code></pre></div>
+</div>
+</div>
+<div id="the-results" class="section level1">
+<h1>The Results</h1>
+<p>Finally, its time to look at some results. The state estimates returned from the filter need some summarizing to yield a “most probable track”. There are several ways to do this (see <span class="citation">C. D. Braun, Galuardi, and Thorrold (<a href="#ref-Braun2017">2017</a>)</span>), but <code>HMMoce</code> currently relies on calculating the mean from each posterior distribution to estimate a track using <code>calc.track</code>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># GET THE MOST PROBABLE TRACK</span>
+tr &lt;-<span class="st"> </span><span class="kw">calc.track</span>(s, g, dateVec, iniloc)</code></pre></div>
+<p>A simple plot of track results and behavior estimates can be generated using <code>plotHMM</code> and to visualize the residency distributions (see <span class="citation">M. Pedersen et al. (<a href="#ref-Pedersen2011">2011</a>)</span>) use <code>plotRD</code>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># A SIMPLE MOVEMENT/BEHAVIOR PLOT</span>
+<span class="kw">plotHMM</span>(s, tr, dateVec, <span class="dt">ptt=</span>runName, <span class="dt">save.plot =</span> T)
+
+<span class="co"># PLOT RESIDENCY DISTRIBUTION</span>
+<span class="kw">plotRD</span>(s, tr, xlims, ylims, <span class="dt">save.plot=</span>F)</code></pre></div>
+</div>
+<div id="an-example-script" class="section level1">
+<h1>An example script</h1>
+<p>Here we put all of the above logic into a full working example script using the example blue shark data included with the package. Please file any issues or suggestions for improvement of <code>HMMoce</code> on the GitHub <a href="https://github.com/camrinbraun/HMMoce">site</a>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#========================</span>
+## HMMoce run w/example data
+<span class="co">#========================</span>
+<span class="co"># might be a good idea to install latest version of HMMoce</span>
+<span class="co"># install.packages('HMMoce')</span>
+<span class="kw">library</span>(HMMoce)
+
+<span class="co">#------------</span>
+<span class="co"># LOAD THE TAG DATA</span>
+<span class="co">#------------</span>
+<span class="co"># setwd()</span>
+
+<span class="co"># SET INITIAL LOCATIONS (TAG AND POP-UP)</span>
+iniloc &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="kw">matrix</span>(<span class="kw">c</span>(<span class="dv">13</span>, <span class="dv">10</span>, <span class="dv">2015</span>, <span class="fl">41.3</span>, -<span class="fl">69.27</span>, 
+                              <span class="dv">10</span>, <span class="dv">4</span>, <span class="dv">2016</span>, <span class="fl">40.251</span>, -<span class="fl">36.061</span>), <span class="dt">nrow =</span> <span class="dv">2</span>, <span class="dt">ncol =</span> <span class="dv">5</span>, <span class="dt">byrow =</span> T))
+<span class="kw">names</span>(iniloc) &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="st">'day'</span>,<span class="st">'month'</span>,<span class="st">'year'</span>,<span class="st">'lat'</span>,<span class="st">'lon'</span>)
+tag &lt;-<span class="st"> </span><span class="kw">as.POSIXct</span>(<span class="kw">paste</span>(iniloc[<span class="dv">1</span>,<span class="dv">1</span>], <span class="st">'/'</span>, iniloc[<span class="dv">1</span>,<span class="dv">2</span>], <span class="st">'/'</span>, iniloc[<span class="dv">1</span>,<span class="dv">3</span>], <span class="dt">sep=</span><span class="st">''</span>), <span class="dt">format =</span> <span class="st">'%d/%m/%Y'</span>, <span class="dt">tz=</span><span class="st">'UTC'</span>)
+pop &lt;-<span class="st"> </span><span class="kw">as.POSIXct</span>(<span class="kw">paste</span>(iniloc[<span class="dv">2</span>,<span class="dv">1</span>], <span class="st">'/'</span>, iniloc[<span class="dv">2</span>,<span class="dv">2</span>], <span class="st">'/'</span>, iniloc[<span class="dv">2</span>,<span class="dv">3</span>], <span class="dt">sep=</span><span class="st">''</span>), <span class="dt">format =</span> <span class="st">'%d/%m/%Y'</span>, <span class="dt">tz=</span><span class="st">'UTC'</span>)
+
+<span class="co"># VECTOR OF DATES FROM DATA. THIS WILL BE THE TIME STEPS, T, IN THE LIKELIHOODS</span>
+dateVec &lt;-<span class="st"> </span><span class="kw">as.Date</span>(<span class="kw">seq</span>(tag, pop, <span class="dt">by =</span> <span class="st">'day'</span>)) 
+
+<span class="co"># READ IN DATA AS OUTPUT FROM WC PORTAL</span>
+<span class="co"># SST DATA</span>
+sstFile &lt;-<span class="st"> </span><span class="kw">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;141259-SST.csv&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;HMMoce&quot;</span>)
+tag.sst &lt;-<span class="st"> </span><span class="kw">read.wc</span>(ptt, sstFile, <span class="dt">type =</span> <span class="st">'sst'</span>, <span class="dt">tag=</span>tag, <span class="dt">pop=</span>pop, <span class="dt">verbose=</span>T) 
+sst.udates &lt;-<span class="st"> </span>tag.sst$udates; tag.sst &lt;-<span class="st"> </span>tag.sst$data
+
+<span class="co"># DEPTH-TEMPERATURE PROFILE DATA</span>
+pdtFile &lt;-<span class="st"> </span><span class="kw">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;141259-PDTs.csv&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;HMMoce&quot;</span>)
+pdt &lt;-<span class="st"> </span><span class="kw">read.wc</span>(ptt, pdtFile, <span class="dt">type =</span> <span class="st">'pdt'</span>, <span class="dt">tag=</span>tag, <span class="dt">pop=</span>pop, <span class="dt">verbose=</span>T) 
+pdt.udates &lt;-<span class="st"> </span>pdt$udates; pdt &lt;-<span class="st"> </span>pdt$data
+
+<span class="co"># RAW LIGHT DATA</span>
+<span class="co">#lightFile &lt;- system.file(&quot;extdata&quot;, &quot;141259-LightLoc.csv&quot;, package = &quot;HMMoce&quot;)</span>
+<span class="co">#light &lt;- read.wc(ptt, lightFile, type = 'light', tag=tag, pop=pop); </span>
+<span class="co">#light.udates &lt;- light$udates; light &lt;- light$data</span>
+
+<span class="co"># LIGHT BASED POSITIONS FROM GPE2 (INSTEAD OF RAW LIGHTLOCS FROM PREVIOUS)</span>
+locsFile &lt;-<span class="st"> </span><span class="kw">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;141259-Locations-GPE2.csv&quot;</span>, <span class="dt">package =</span> <span class="st">&quot;HMMoce&quot;</span>)
+locs &lt;-<span class="st"> </span><span class="kw">read.table</span>(locsFile, <span class="dt">sep =</span> <span class="st">','</span>, <span class="dt">header =</span> T, <span class="dt">blank.lines.skip =</span> F)
+locDates &lt;-<span class="st"> </span><span class="kw">as.Date</span>(<span class="kw">as.POSIXct</span>(locs$Date, <span class="dt">format=</span><span class="kw">findDateFormat</span>(locs$Date)))
+
+<span class="co"># SET SPATIAL LIMITS</span>
+<span class="co"># these are the lat/lon bounds of your study area (e.g. where you think the animal went)</span>
+sp.lim &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="dt">lonmin =</span> -<span class="dv">82</span>,
+               <span class="dt">lonmax =</span> -<span class="dv">25</span>,
+               <span class="dt">latmin =</span> <span class="dv">15</span>,
+               <span class="dt">latmax =</span> <span class="dv">50</span>)
+
+<span class="co">#------------ </span>
+##  GET ENVIRONMENTAL DATA 
+<span class="co">#------------ </span>
+<span class="co"># env data downloads can be</span>
+<span class="co">#large, depending on application for 180 days of data spanning the NW Atlantic</span>
+<span class="co">#(the example application), the downloads will take ~10mins on Amazon EC2.</span>
+<span class="co">#Personal computers will likely be slower.</span>
+
+<span class="co"># DOWNLOAD SST DATA</span>
+sst.dir &lt;-<span class="st"> </span><span class="kw">paste</span>(<span class="kw">tempdir</span>(), <span class="st">'/sst/'</span>, <span class="dt">sep=</span><span class="st">''</span>)
+<span class="kw">dir.create</span>(sst.dir, <span class="dt">recursive =</span> <span class="ot">TRUE</span>)
+<span class="kw">get.env</span>(sst.udates, <span class="dt">filename=</span><span class="st">'oisst'</span>, <span class="dt">type =</span> <span class="st">'sst'</span>, <span class="dt">sst.type=</span><span class="st">'oi'</span>, <span class="dt">spatLim =</span> sp.lim, <span class="dt">save.dir =</span> sst.dir)
+
+<span class="co"># YOU NEED SOME REPRESENTATION OF ENVIRONMENTAL DEPTH-TEMPERATURE</span>
+<span class="co"># HYCOM DATA</span>
+hycom.dir &lt;-<span class="st"> </span><span class="kw">paste</span>(<span class="kw">tempdir</span>(), <span class="st">'/hycom/'</span>, <span class="dt">sep=</span><span class="st">''</span>)
+<span class="kw">dir.create</span>(hycom.dir, <span class="dt">recursive =</span> <span class="ot">TRUE</span>)
+<span class="kw">get.env</span>(pdt.udates, <span class="dt">filename=</span><span class="st">'hycom'</span>, <span class="dt">type =</span> <span class="st">'hycom'</span>, <span class="dt">spatLim =</span> sp.lim, <span class="dt">save.dir =</span> hycom.dir)
+
+<span class="co"># OR WORLD OCEAN ATLAS DATA</span>
+<span class="co">#woa.dir &lt;- paste(tempdir(), '/woa/', sep='')</span>
+<span class="co">#dir.create(woa.dir, recursive = TRUE)</span>
+<span class="co">#get.env(type = 'woa', resol = 'quarter', save.dir = woa.dir)</span>
+<span class="co"># THEN LOAD AND CHECK THE DOWNLOADED RDA FILE FOR WOA</span>
+<span class="co">#load(paste(woa.dir,'woa.quarter.rda',sep=''))</span>
+<span class="co">#str(woa.quarter)</span>
+<span class="co">#List of 4</span>
+<span class="co">#$ watertemp: num [1:44, 1:46, 1:57, 1:12] 26.5 26.5 26.4 26.3 26.2 ...</span>
+<span class="co">#$ lon      : num [1:44(1d)] -95.5 -94.5 -93.5 -92.5 -91.5 -90.5 -89.5 -88.5 -87.5 -86.5 ...</span>
+<span class="co">#$ lat      : num [1:46(1d)] 9.5 10.5 11.5 12.5 13.5 14.5 15.5 16.5 17.5 18.5 ...</span>
+<span class="co">#$ depth    : num [1:57(1d)] 0 5 10 15 20 25 30 35 40 45 ...</span>
+
+<span class="co"># BATHYMETRY</span>
+bathy.dir &lt;-<span class="st"> </span><span class="kw">paste</span>(<span class="kw">tempdir</span>(), <span class="st">'/bathy/'</span>, <span class="dt">sep=</span><span class="st">''</span>)
+<span class="kw">dir.create</span>(bathy.dir, <span class="dt">recursive =</span> <span class="ot">TRUE</span>)
+bathy &lt;-<span class="st"> </span><span class="kw">get.bath.data</span>(sp.lim$lonmin, sp.lim$lonmax, sp.lim$latmin, sp.lim$latmax, <span class="dt">folder =</span> bathy.dir)
+<span class="co">#library(raster); plot(bathy)</span>
+<span class="co"># OR READ IT FROM NETCDF</span>
+<span class="co">#bathy.nc &lt;- RNetCDF::open.nc(paste(bathy.dir, 'bathy.nc', sep=''))</span>
+
+<span class="co">#------------</span>
+<span class="co"># CALCULATE LIKELIHOODS</span>
+<span class="co">#------------</span>
+<span class="co"># .par functions are the same calculations as those lacking .par, except they have been parallelized to leverage multiple CPUs</span>
+locs.grid &lt;-<span class="st"> </span><span class="kw">setup.locs.grid</span>(sp.lim)
+
+<span class="co"># vector indicating which likelihoods to run (e.g. 1=light, 2=sst, 5=hycom)</span>
+<span class="co"># can be combined with if() statements around calc functions: if (any(likVec == 5) &amp; !exists('L.5')){calc.hycom(...)}</span>
+likVec &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">5</span>) 
+
+<span class="co"># LIGHT-BASED LIKELIHOODS</span>
+<span class="co">#L.1 &lt;- calc.srss(light, locs.grid = locs.grid, dateVec = dateVec, res=0.25) # if trying to use raw light levels, not currently recommended (v0.2)</span>
+L<span class="fl">.1</span> &lt;-<span class="st"> </span><span class="kw">calc.gpe2</span>(locs, locDates, <span class="dt">locs.grid =</span> locs.grid, <span class="dt">dateVec =</span> dateVec, <span class="dt">errEll =</span> <span class="ot">FALSE</span>, <span class="dt">gpeOnly =</span> <span class="ot">TRUE</span>)
+<span class="co">#library(fields);library(raster)</span>
+<span class="co">#plot(L.1[[12]]); world(add=T)</span>
+
+<span class="co"># SST LIKELIHOODS</span>
+<span class="co">#L.2 &lt;- calc.sst(tag.sst, filename='oisst', sst.dir = sst.dir, dateVec = dateVec, sens.err = 1)</span>
+L<span class="fl">.2</span> &lt;-<span class="st"> </span><span class="kw">calc.sst.par</span>(tag.sst, <span class="dt">filename=</span><span class="st">'oisst'</span>, <span class="dt">sst.dir =</span> sst.dir, <span class="dt">dateVec =</span> dateVec, <span class="dt">sens.err =</span> <span class="dv">1</span>)
+<span class="co"># save.image() # good idea to save after these larger calculations in case the next one causes problems</span>
+ <span class="kw">gc</span>(); <span class="kw">closeAllConnections</span>() <span class="co"># also good to do garbage collection and kill any straggling processes that are running</span>
+
+<span class="co"># PDT LIKELIHOODS</span>
+<span class="co"># OCEAN HEAT CONTENT (INTEGRATED PDTS)</span>
+L<span class="fl">.3</span> &lt;-<span class="st"> </span><span class="kw">calc.ohc.par</span>(pdt, <span class="dt">filename=</span><span class="st">'hycom'</span>, <span class="dt">ohc.dir =</span> hycom.dir, <span class="dt">dateVec =</span> dateVec, <span class="dt">isotherm =</span> <span class="st">''</span>, <span class="dt">use.se =</span> F)
+<span class="co"># save.image() # good idea to save after these larger calculations in case the next one causes problems</span>
+ <span class="kw">gc</span>(); <span class="kw">closeAllConnections</span>() <span class="co"># also good to do garbage collection and kill any straggling processes that are running</span>
+
+<span class="co"># WORLD OCEAN ATLAS-BASED LIKELIHOODS</span>
+L<span class="fl">.4</span> &lt;-<span class="st"> </span><span class="kw">calc.woa.par</span>(pdt, <span class="dt">ptt=</span>ptt, <span class="dt">woa.data =</span> woa.quarter, <span class="dt">sp.lim=</span>sp.lim, <span class="dt">focalDim =</span> <span class="dv">9</span>, <span class="dt">dateVec =</span> dateVec, <span class="dt">use.se =</span> T)
+<span class="co"># save.image() # good idea to save after these larger calculations in case the next one causes problems</span>
+ <span class="kw">gc</span>(); <span class="kw">closeAllConnections</span>() <span class="co"># also good to do garbage collection and kill any straggling processes that are running</span>
+
+<span class="co"># HYCOM PROFILE BASED LIKELIHOODS</span>
+L<span class="fl">.5</span> &lt;-<span class="st"> </span><span class="kw">calc.hycom.par</span>(pdt, <span class="dt">filename=</span><span class="st">'hycom'</span>, hycom.dir, <span class="dt">focalDim =</span> <span class="dv">9</span>, <span class="dt">dateVec =</span> dateVec, <span class="dt">use.se =</span> T)
+<span class="co"># save.image() # good idea to save after these larger calculations in case the next one causes problems</span>
+ <span class="kw">gc</span>(); <span class="kw">closeAllConnections</span>() <span class="co"># also good to do garbage collection and kill any straggling processes that are running</span>
+<span class="co">#save.image('~/ebs/example.rda')</span>
+
+<span class="co">#------------</span>
+<span class="co"># PREPARE TO RUN THE MODEL</span>
+<span class="co">#------------</span>
+L.rasters &lt;-<span class="st"> </span><span class="kw">mget</span>(<span class="kw">ls</span>(<span class="dt">pattern =</span> <span class="st">'L</span><span class="ch">\\</span><span class="st">.'</span>)) <span class="co"># use with caution as all workspace items containing 'L.' will be listed. We only want the likelihood outputs calculated above</span>
+resamp.idx &lt;-<span class="st"> </span><span class="kw">which.max</span>(<span class="kw">lapply</span>(L.rasters, <span class="dt">FUN=</span>function(x) raster::<span class="kw">res</span>(x)[<span class="dv">1</span>]))
+L.res &lt;-<span class="st"> </span><span class="kw">resample.grid</span>(L.rasters, L.rasters[[resamp.idx]])
+
+<span class="co"># Figure out appropriate L combinations</span>
+<span class="co"># use this if you have a vector (likVec) indicating which likelihoods you are calculating</span>
+<span class="co"># for example, likVec &lt;- c(1,2,5) for light, sst, and hycom likelihoods</span>
+if (<span class="kw">length</span>(likVec) &gt;<span class="st"> </span><span class="dv">2</span>){
+  L.idx &lt;-<span class="st"> </span><span class="kw">c</span>(utils::<span class="kw">combn</span>(likVec, <span class="dv">2</span>, <span class="dt">simplify=</span>F), utils::<span class="kw">combn</span>(likVec, <span class="dv">3</span>, <span class="dt">simplify=</span>F))
+} else{
+  L.idx &lt;-<span class="st"> </span>utils::<span class="kw">combn</span>(likVec, <span class="dv">2</span>, <span class="dt">simplify=</span>F)
+}
+
+<span class="co"># which of L.idx combinations do you want to run?</span>
+run.idx &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">4</span>)
+
+<span class="co"># vector of appropriate bounding in filter. see ?hmm.filter for more info</span>
+bndVec &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="ot">NA</span>, <span class="dv">5</span>, <span class="dv">10</span>)
+
+<span class="co"># vector of appropriate migr kernel speed. see ?makePar for more info.</span>
+parVec &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="dv">2</span>, <span class="dv">4</span>)
+
+<span class="co"># GOOD IDEA TO CLEAN THINGS UP AND SAVE</span>
+<span class="co">#rm(list=c('L.1','L.2','L.3','L.4','L.5', 'woa.quarter'))</span>
+<span class="co"># setwd(); base::save.image('.rda')</span>
+
+<span class="co">#------------</span>
+<span class="co"># RUN THE MODEL</span>
+<span class="co">#------------</span>
+<span class="co"># CAN BE PARALLELIZED...</span>
+<span class="co">#require(foreach)</span>
+<span class="co">#print('Processing in parallel... ')</span>
+<span class="co">#ncores &lt;- ceiling(parallel::detectCores() * .25)</span>
+<span class="co">#cl = parallel::makeCluster(ncores)</span>
+<span class="co">#doParallel::registerDoParallel(cl, cores = ncores)</span>
+<span class="co">#ans = foreach::foreach(tt = run.idx) %dopar%{</span>
+
+for (tt in run.idx){
+  for (bnd in bndVec){
+    for (i in parVec){
+      
+      ptt=<span class="dv">141259</span>
+      runName &lt;-<span class="st"> </span><span class="kw">paste</span>(ptt,<span class="st">'_idx'</span>,tt,<span class="st">'_bnd'</span>,bnd,<span class="st">'_par'</span>,i,<span class="dt">sep=</span><span class="st">''</span>)
+      
+      <span class="co"># COMBINE LIKELIHOOD MATRICES</span>
+      <span class="co"># L.idx combination indicates likelihood surfaces to consider</span>
+      L &lt;-<span class="st"> </span><span class="kw">make.L</span>(<span class="dt">L1 =</span> L.res[[<span class="dv">1</span>]][L.idx[[tt]]],
+                  <span class="dt">L.mle.res =</span> L.res$L.mle.res, <span class="dt">dateVec =</span> dateVec,
+                  <span class="dt">locs.grid =</span> locs.grid, <span class="dt">iniloc =</span> iniloc, <span class="dt">bathy =</span> bathy,
+                  <span class="dt">pdt =</span> pdt)
+      L.mle &lt;-<span class="st"> </span>L$L.mle
+      L &lt;-<span class="st"> </span>L$L
+      g &lt;-<span class="st"> </span>L.res$g
+      g.mle &lt;-<span class="st"> </span>L.res$g.mle
+      lon &lt;-<span class="st"> </span>g$lon[<span class="dv">1</span>,]
+      lat &lt;-<span class="st"> </span>g$lat[,<span class="dv">1</span>]
+      
+      <span class="co"># GET MOVEMENT KERNELS AND SWITCH PROB FOR COARSE GRID</span>
+      par0 &lt;-<span class="st"> </span><span class="kw">makePar</span>(<span class="dt">migr.spd=</span>i, <span class="dt">grid=</span>g.mle, <span class="dt">L.arr=</span>L.mle, <span class="dt">p.guess=</span><span class="kw">c</span>(.<span class="dv">9</span>,.<span class="dv">9</span>), <span class="dt">calcP=</span>T)
+      P.final &lt;-<span class="st"> </span>par0$P.final
+      
+      <span class="co"># GET MOVEMENT KERNELS AND SWITCH PROB FOR FINER GRID</span>
+      par0 &lt;-<span class="st"> </span><span class="kw">makePar</span>(<span class="dt">migr.spd=</span>i, <span class="dt">grid=</span>g, <span class="dt">L.arr=</span>L, <span class="dt">p.guess=</span><span class="kw">c</span>(.<span class="dv">9</span>,.<span class="dv">9</span>), <span class="dt">calcP=</span>F)
+      K1 &lt;-<span class="st"> </span>par0$K1; K2 &lt;-<span class="st"> </span>par0$K2
+      
+      <span class="co"># RUN THE FILTER STEP</span>
+      if(!<span class="kw">is.na</span>(bnd)){
+        f &lt;-<span class="st"> </span><span class="kw">hmm.filter</span>(g, L, K1, K2, <span class="dt">maskL=</span>T, P.final, <span class="dt">minBounds =</span> bnd)
+        maskL.logical &lt;-<span class="st"> </span><span class="ot">TRUE</span>
+      } else{
+        f &lt;-<span class="st"> </span><span class="kw">hmm.filter</span>(g, L, K1, K2, P.final, <span class="dt">maskL=</span>F)
+        maskL.logical &lt;-<span class="st"> </span><span class="ot">FALSE</span>
+      }
+      nllf &lt;-<span class="st"> </span>-<span class="kw">sum</span>(<span class="kw">log</span>(f$psi[f$psi&gt;<span class="dv">0</span>])) <span class="co"># negative log-likelihood</span>
+      
+      <span class="co"># RUN THE SMOOTHING STEP</span>
+      s &lt;-<span class="st"> </span><span class="kw">hmm.smoother</span>(f, K1, K2, L, P.final)
+      
+      <span class="co"># GET THE MOST PROBABLE TRACK</span>
+      tr &lt;-<span class="st"> </span><span class="kw">calc.track</span>(s, g, dateVec, iniloc)
+      <span class="co">#setwd(myDir); </span>
+      <span class="kw">plotHMM</span>(s, tr, dateVec, <span class="dt">ptt=</span>runName, <span class="dt">save.plot =</span> T)
+      
+      <span class="co"># WRITE OUT RESULTS</span>
+      outVec &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">c</span>(<span class="dt">ptt=</span>ptt, <span class="dt">minBounds =</span> bnd, <span class="dt">migr.spd =</span> i,
+                         <span class="dt">Lidx =</span> <span class="kw">paste</span>(L.idx[[tt]],<span class="dt">collapse=</span><span class="st">''</span>), <span class="dt">P1 =</span> P.final[<span class="dv">1</span>,<span class="dv">1</span>], <span class="dt">P2 =</span> P.final[<span class="dv">2</span>,<span class="dv">2</span>],
+                         <span class="dt">spLims =</span> sp.lim[<span class="dv">1</span>:<span class="dv">4</span>], <span class="dt">resol =</span> raster::<span class="kw">res</span>(L.rasters[[resamp.idx]]),
+                         <span class="dt">maskL =</span> maskL.logical, <span class="dt">NLL =</span> nllf, <span class="dt">name =</span> runName), <span class="dt">ncol=</span><span class="dv">15</span>)
+      <span class="co">#write.table(outVec,paste(dataDir, 'outVec_results.csv', sep=''), sep=',', col.names=F, append=T)</span>
+      <span class="co">#names(outVec) &lt;- c('ptt','bnd','migr.spd','Lidx','P1','P2','spLims','resol','maskL','nll','name')</span>
+      res &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="dt">outVec =</span> outVec, <span class="dt">s =</span> s, <span class="dt">g =</span> g, <span class="dt">tr =</span> tr, <span class="dt">dateVec =</span> dateVec, <span class="dt">iniloc =</span> iniloc, <span class="dt">grid =</span> raster::<span class="kw">res</span>(L.res[[<span class="dv">1</span>]]$L<span class="fl">.5</span>)[<span class="dv">1</span>])
+      <span class="co">#setwd()</span>
+      <span class="kw">save</span>(res, <span class="dt">file=</span><span class="kw">paste</span>(runName, <span class="st">'-HMMoce_res.rda'</span>, <span class="dt">sep=</span><span class="st">''</span>))
+      <span class="co">#save.image(file=paste(ptt, '-HMMoce.RData', sep=''))</span>
+      <span class="co">#source('~/HMMoce/R/hmm.diagnose.r') # not yet functional</span>
+      <span class="co">#hmm.diagnose(res, L.idx, L.res, dateVec, locs.grid, iniloc, bathy, pdt, plot=T)</span>
+      
+      <span class="kw">write.table</span>(outVec, <span class="dt">file=</span><span class="st">'HMMoce_results_outVec.csv'</span>, <span class="dt">sep=</span><span class="st">','</span>, <span class="dt">append=</span>T)
+      
+    } <span class="co"># parVec loop</span>
+  } <span class="co"># bndVec loop</span>
+} <span class="co"># L.idx loop</span>
+
+
+<span class="co">#parallel::stopCluster(cl)</span>
+<span class="co">#closeAllConnections()</span></code></pre></div>
+<div id="references" class="section level3 unnumbered">
+<h3>References</h3>
+<div id="refs" class="references">
+<div id="ref-Braun2017">
+<p>Braun, C D, B Galuardi, and S R Thorrold. 2017. “An improved hidden Markov method for geolocating archival-tagged fishes.” <em>Methods in Ecology and Evolution</em> x (x).</p>
+</div>
+<div id="ref-Hill2001">
+<p>Hill, Roger D, and Melinda J Braun. 2001. “Geolocation by light level.” In <em>Electronic Tagging and Tracking in Marine Fisheries: Proceedings of the Symposium on Tagging and Tracking Marine Fish with Electronic Devices</em>, 315–30. University of Hawaii: Springer.</p>
+</div>
+<div id="ref-Luo2015">
+<p>Luo, Jiangang, Jerald S. Ault, Lynn K. Shay, John P. Hoolihan, Eric D. Prince, Craig a. Brown, and Jay R. Rooker. 2015. “Ocean Heat Content Reveals Secrets of Fish Migrations.” <em>Plos One</em> 10 (10): e0141101. doi:<a href="https://doi.org/10.1371/journal.pone.0141101">10.1371/journal.pone.0141101</a>.</p>
+</div>
+<div id="ref-Neilson2009">
+<p>Neilson, John D, Sean Smith, François Royer, Stacey D Paul, Julie M Porter, and Molly Lutcavage. 2009. “Investigations of horizontal movements of Atlantic swordfish using pop-up satellite archival tags.” In <em>Tagging and Tracking of Marine Animals with Electronic Devices</em>, 145–59. Springer.</p>
+</div>
+<div id="ref-Pedersen2008">
+<p>Pedersen, M W, D Righton, U H Thygesen, K H Andersen, and H Madsen. 2008. “Geolocation of North Sea cod (Gadus morhua) using hidden Markov models and behavioural switching.” <em>Canadian Journal of Fisheries and Aquatic Sciences</em> 65 (11): 2367–77. doi:<a href="https://doi.org/10.1139/f08-144">10.1139/f08-144</a>.</p>
+</div>
+<div id="ref-Pedersen2011">
+<p>Pedersen, M.W., C.W. Berg, U.H. Thygesen, a. Nielsen, and H. Madsen. 2011. “Estimation methods for nonlinear state-space models in ecology.” <em>Ecological Modelling</em> 222 (8). Elsevier B.V.: 1394–1400. doi:<a href="https://doi.org/10.1016/j.ecolmodel.2011.01.007">10.1016/j.ecolmodel.2011.01.007</a>.</p>
+</div>
+<div id="ref-Skomal2009">
+<p>Skomal, G B, S I Zeeman, J H Chisholm, E L Summers, H J Walsh, K W McMahon, and S R Thorrold. 2009. “Transequatorial migrations by basking sharks in the western Atlantic Ocean.” <em>Current Biology</em> 19 (12): 1019–22. doi:<a href="https://doi.org/10.1016/j.cub.2009.04.019">10.1016/j.cub.2009.04.019</a>.</p>
+</div>
+<div id="ref-Woillez2016">
+<p>Woillez, Mathieu, Ronan Fablet, Tran Thanh Ngo, Maxime Lalire, Pascal Lazure, and Hélène de Pontual. 2016. “A HMM-based model to geolocate pelagic fish from high-resolution individual temperature and depth histories: European sea bass as a case study.” <em>Ecological Modelling</em> 321. Elsevier B.V.: 10–22. doi:<a href="https://doi.org/10.1016/j.ecolmodel.2015.10.024">10.1016/j.ecolmodel.2015.10.024</a>.</p>
+</div>
+</div>
+</div>
+</div>
+
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,19 @@
+citHeader("To cite HMMoce in publications use:")
+
+citEntry(entry = "Article",
+         title        = "An improved hidden Markov method for geolocating archival-tagged fishes",
+         author       = personList(as.person("Camrin D Braun"),
+                                   as.person("Benjamin Galuardi"),
+                                   as.person("Simon R Thorrold")),
+         journal      = "Methods in Ecology and Evolution",
+         year         = "in review",
+         volume       = "x",
+         number       = "x",
+         pages        = "x",
+         url          = "x",
+         
+         textVersion  =
+           paste("Braun CD, Galuardi B, Thorrold ST (submitted).",
+                 "An improved hidden Markov method for geolocating archival-tagged fishes",
+                 "Methods in Ecology and Evolution, x(x), x-x.")
+)
